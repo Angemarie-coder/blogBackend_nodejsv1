@@ -8,7 +8,8 @@ import {
   likePost,
   commentPost,
   getUserBlogStats,
-  getUserPosts
+  getUserPosts,
+  checkUserLike
 } from '../controllers/post.controller';
 import { authorize, isAuthor } from '../middleware/authorize';
 import { authenticated } from '../middleware/auth.middleware';
@@ -26,6 +27,7 @@ router.post('/posts', authorize(['admin', 'user']), createPost);
 router.put('/posts/:id', authorize(['admin', 'user']), isAuthor, updatePost);
 router.delete('/posts/:id', authorize(['admin', 'user']), isAuthor, deletePost);
 router.post('/posts/:id/like', authorize(['admin', 'user']), likePost);
+router.get('/posts/:id/like', authorize(['admin', 'user']), checkUserLike);
 router.post('/posts/:id/comment', authorize(['admin', 'user']), commentPost);
 router.get('/user/stats', authorize(['admin', 'user']), getUserBlogStats);
 router.get('/user/posts', authorize(['admin', 'user']), getUserPosts);

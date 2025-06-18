@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { User } from '../models/User';
 import { Post } from '../models/Post';
 import { PasswordResetToken } from '../models/PasswordResetToken';
+import { Like } from '../models/Like';
 
 dotenv.config();
 
@@ -14,7 +15,7 @@ export const AppDataSource = new DataSource({
   password: process.env.DB_PASSWORD || 'ange1',
   database: process.env.DB_NAME || 'blogpost_db',
   synchronize: process.env.NODE_ENV !== '', 
-  entities: [User, Post, PasswordResetToken],
+  entities: [User, Post, PasswordResetToken, Like],
   migrations: ['src/migrations/**/*.ts'],
   subscribers: ['src/subscribers/**/*.ts'],
 });

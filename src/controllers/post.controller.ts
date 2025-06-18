@@ -11,12 +11,14 @@ import { AuthenticatedRequest, ApiResponse } from '../types/common.types';
 import { NotFoundError, UnauthorizedError } from '../utils/errors';
 import { Request } from 'express';
 import { Post } from '../models/Post';
+import { Like } from '../models/Like';
 import { getRepository } from 'typeorm';
 import { AppDataSource } from '../config/database';
 import { MoreThanOrEqual } from 'typeorm';
 
 const postService = new PostService();
 const postRepo = AppDataSource.getRepository(Post);
+const likeRepo = AppDataSource.getRepository(Like);
 
 // @desc    Create a new post
 // @route   POST /blog/posts
@@ -187,13 +189,65 @@ export const deletePost = asyncHandler(async (
 });
 
 // Like a post
-export const likePost = async (req: Request, res: Response) => {
+export const likePost = async (req: AuthenticatedRequest, res: Response) => {
+  if (!req.user) {
+    return res.status(401).json({ success: false, message: 'User not authenticated' });
+  }
+
   const postId = parseInt(req.params.id);
+  const userId = req.user.id;
+
   const post = await postRepo.findOne({ where: { id: postId } });
-  if (!post) return res.status(404).json({ success: false, message: 'Post not found' });
-  post.likes += 1;
-  await postRepo.save(post);
-  res.json({ success: true, message: 'Post liked', data: { likes: post.likes } });
+  if (!post) {
+    return res.status(404).json({ success: false, message: 'Post not found' });
+  }
+
+  // Check if user already liked this post
+  const existingLike = await likeRepo.findOne({ 
+    where: { userId: userId, postId: postId } 
+  });
+
+  if (existingLike) {
+    // Unlike: remove the like and decrease count
+    await likeRepo.remove(existingLike);
+    post.likes = Math.max(0, post.likes - 1);
+    await postRepo.save(post);
+    res.json({ 
+      success: true, 
+      message: 'Post unliked', 
+      data: { likes: post.likes, liked: false } 
+    });
+  } else {
+    // Like: add the like and increase count
+    const newLike = likeRepo.create({ userId: userId, postId: postId });
+    await likeRepo.save(newLike);
+    post.likes += 1;
+    await postRepo.save(post);
+    res.json({ 
+      success: true, 
+      message: 'Post liked', 
+      data: { likes: post.likes, liked: true } 
+    });
+  }
+};
+
+// Check if user has liked a post
+export const checkUserLike = async (req: AuthenticatedRequest, res: Response) => {
+  if (!req.user) {
+    return res.status(401).json({ success: false, message: 'User not authenticated' });
+  }
+
+  const postId = parseInt(req.params.id);
+  const userId = req.user.id;
+
+  const existingLike = await likeRepo.findOne({ 
+    where: { userId: userId, postId: postId } 
+  });
+
+  res.json({ 
+    success: true, 
+    data: { liked: !!existingLike } 
+  });
 };
 
 // Comment on a post (just increment count for now)

@@ -63,6 +63,8 @@ export class PostService {
           media: true,
           createdAt: true,
           updatedAt: true,
+          likes: true,
+          comments: true,
           author: include?.[0]?.attributes.reduce((acc, attr) => ({ ...acc, [attr]: true }), {})
         }
       };
@@ -96,6 +98,8 @@ export class PostService {
           status:true,
           createdAt: true, 
           updatedAt: true,
+          likes: true,
+          comments: true,
           author: options?.include?.[0]?.attributes.reduce((acc, attr) => ({ ...acc, [attr]: true }), {})
         }
       };
