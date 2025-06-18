@@ -46,6 +46,6 @@ export class User {
   @OneToMany(() => PasswordResetToken, (token) => token.user)
   passwordResetTokens!: PasswordResetToken[];
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, length: 1024 })
   profileImage?: string;
 }

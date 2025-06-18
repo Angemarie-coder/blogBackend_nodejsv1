@@ -129,7 +129,7 @@ export const getProfile = async (req: AuthenticatedRequest, res: Response) => {
   res.json({ success: true, data: { id: user.id, name: user.name, email: user.email, role: user.role, profileImage: user.profileImage } });
 };
 
-// Update current user profile (name, profileImage)
+// Update current user profile (name, profileImage only)
 export const updateProfile = async (req: AuthenticatedRequest, res: Response) => {
   if (!req.user) return res.status(401).json({ success: false, message: 'User not authenticated' });
   const userId = req.user.id;
@@ -139,5 +139,5 @@ export const updateProfile = async (req: AuthenticatedRequest, res: Response) =>
   if (name) user.name = name;
   if (profileImage) user.profileImage = profileImage;
   await userRepo.save(user);
-  res.json({ success: true, message: 'Profile updated', data: { name: user.name, profileImage: user.profileImage } });
+  res.json({ success: true, message: 'Profile updated', data: { id: user.id, name: user.name, email: user.email, role: user.role, profileImage: user.profileImage } });
 };
